@@ -19,7 +19,7 @@ func makeHandlerfunc() func(request events.APIGatewayProxyRequest) (events.APIGa
 }
 
 type DocuSignEnvelopeInformation struct {
-	XMLName        xml.Name       `xml:"DocuSignEnvelopeInformation"`
+	XMLName        xml.Name       `xml:"DocuSignEnvelopeInformation" json:"-"`
 	EnvelopeStatus EnvelopeStatus `xml:"EnvelopeStatus"`
 	DocumentPDFs   DocumentPDFs   `xml:"DocumentPDFs"`
 	TimeZone       string
@@ -27,7 +27,7 @@ type DocuSignEnvelopeInformation struct {
 }
 
 type EnvelopeStatus struct {
-	XMLName           xml.Name `xml:"EnvelopeStatus"`
+	XMLName           xml.Name `xml:"EnvelopeStatus" json:"-"`
 	TimeGenerated     string   `xml:"TimeGenerated"`
 	EnvelopeID        string
 	Subject           string
@@ -45,23 +45,23 @@ type EnvelopeStatus struct {
 }
 
 type DocumentPDFs struct {
-	XMLName      xml.Name      `xml:"DocumentPDFs"`
+	XMLName      xml.Name      `xml:"DocumentPDFs" json:"-"`
 	DocumentPDFs []DocumentPDF `xml:"DocumentPDF"`
 }
 
 type DocumentPDF struct {
-	XMLName      xml.Name `xml:"DocumentPDF"`
+	XMLName      xml.Name `xml:"DocumentPDF" json:"-"`
 	Name         string
 	DocumentType string
 }
 
 type RecipientStatuses struct {
-	XMLName           xml.Name          `xml:"RecipientStatuses"`
+	XMLName           xml.Name          `xml:"RecipientStatuses" json:"-"`
 	RecipientStatuses []RecipientStatus `xml:"RecipientStatus"`
 }
 
 type RecipientStatus struct {
-	XMLName            xml.Name `xml:"RecipientStatus"`
+	XMLName            xml.Name `xml:"RecipientStatus" json:"-"`
 	Type               string
 	EMail              string
 	UserName           string
@@ -76,12 +76,12 @@ type RecipientStatus struct {
 }
 
 type TabStatuses struct {
-	XMLName xml.Name `xml:"TabStatuses"`
+	XMLName xml.Name `xml:"TabStatuses" json:"-"`
 	TabStatuses []TabStatus `xml:"TabStatus"`
 }
 
 type TabStatus struct {
-	XMLName xml.Name `xml:"TabStatus"`
+	XMLName xml.Name `xml:"TabStatus" json:"-"`
 	TabType string
 	Status string
 	XPosition int

@@ -162,6 +162,6 @@ func TestParsing(t *testing.T) {
 	}
 
 	jsonBytes, err := json.Marshal(&envInfo)
-	fmt.Println("---- JSON follow----")
+	fmt.Println("\n---- JSON follows----")
 	fmt.Println(string(jsonBytes))
 }
