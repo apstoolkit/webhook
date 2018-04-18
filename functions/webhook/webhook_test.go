@@ -1,10 +1,10 @@
 package main
 
 import (
-	"testing"
 	"encoding/xml"
-	"github.com/stretchr/testify/assert"
 	"fmt"
+	"github.com/stretchr/testify/assert"
+	"testing"
 )
 
 var samplePayload = `
@@ -151,13 +151,12 @@ var samplePayload = `
     <TimeZoneOffset>-7</TimeZoneOffset>
 </DocuSignEnvelopeInformation>`
 
-
 func TestParsing(t *testing.T) {
 	var envInfo DocuSignEnvelopeInformation
 
 	err := xml.Unmarshal([]byte(samplePayload), &envInfo)
 	if assert.Nil(t, err) {
 		fmt.Printf("%+v", envInfo)
-		assert.Equal(t, "2018-04-17T15:00:22.2587658",envInfo.EnvelopeStatus.TimeGenerated)
+		assert.Equal(t, "2018-04-17T15:00:22.2587658", envInfo.EnvelopeStatus.TimeGenerated)
 	}
 }
