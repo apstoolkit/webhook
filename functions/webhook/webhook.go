@@ -92,7 +92,7 @@ func processRequest(request events.APIGatewayProxyRequest) (events.APIGatewayPro
 
 	if isDocusign == false {
 		log.Println("Callback from a non-docusign user")
-		return events.APIGatewayProxyResponse{StatusCode: http.StatusUnauthorized}, nil
+		return events.APIGatewayProxyResponse{StatusCode: http.StatusForbidden}, nil
 	}
 
 	var envInfo DocuSignEnvelopeInformation
