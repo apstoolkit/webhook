@@ -10,6 +10,11 @@ import (
 	"strings"
 	"errors"
 	"strconv"
+	"github.com/aws/aws-sdk-go/aws/session"
+	"github.com/apstoolkit/webhook/awsctx"
+	"github.com/aws/aws-sdk-go/service/sqs"
+	"github.com/aws/aws-sdk-go/aws"
+	"os"
 )
 
 func ipOctects(ip string) ([]int, error) {
@@ -81,7 +86,7 @@ func isCallerDocusign(xForwardedFor string) (bool, error) {
 	return false, nil
 }
 
-func processRequest(request events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
+func processRequest(awsContext *awsctx.AWSContext, request events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
 	log.Println("processRequest headers", request.Headers)
 
 	xForwardedFor := request.Headers["X-Forwarded-For"]
@@ -106,98 +111,35 @@ func processRequest(request events.APIGatewayProxyRequest) (events.APIGatewayPro
 		log.Println(string(jsonBytes))
 	}
 
+	sendMessageInput := sqs.SendMessageInput{
+		MessageBody: aws.String(string(jsonBytes)),
+		QueueUrl: aws.String(os.Getenv("SQS_URL")),
+	}
+
+	_, err = awsContext.SQSSvc.SendMessage(&sendMessageInput)
+	if err != nil {
+		log.Println("Error queuing status", err.Error())
+		return events.APIGatewayProxyResponse{StatusCode: 500}, nil
+	}
+
 	return events.APIGatewayProxyResponse{StatusCode: 200}, nil
 }
 
-func makeHandlerfunc() func(request events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
+func makeHandlerfunc(awsContent *awsctx.AWSContext) func(request events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
 	return func(request events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
-		return processRequest(request)
+		return processRequest(awsContent,request)
 	}
 }
 
-type DocuSignEnvelopeInformation struct {
-	XMLName        xml.Name       `xml:"DocuSignEnvelopeInformation" json:"-"`
-	EnvelopeStatus EnvelopeStatus `xml:"EnvelopeStatus"`
-	DocumentPDFs   DocumentPDFs   `xml:"DocumentPDFs"`
-	TimeZone       string
-	TimeZoneOffset string
-}
 
-type EnvelopeStatus struct {
-	XMLName           xml.Name `xml:"EnvelopeStatus" json:"-"`
-	TimeGenerated     string   `xml:"TimeGenerated"`
-	EnvelopeID        string
-	Subject           string
-	UserName          string
-	Email             string
-	Status            string
-	Created           string
-	Sent              string
-	Delivered         string
-	Signed            string
-	Completed         string
-	SigningLocation   string
-	SenderIPAddress   string
-	RecipientStatuses RecipientStatuses `xml:"RecipientStatuses"`
-}
-
-type DocumentPDFs struct {
-	XMLName      xml.Name      `xml:"DocumentPDFs" json:"-"`
-	DocumentPDFs []DocumentPDF `xml:"DocumentPDF"`
-}
-
-type DocumentPDF struct {
-	XMLName      xml.Name `xml:"DocumentPDF" json:"-"`
-	Name         string
-	DocumentType string
-}
-
-type RecipientStatuses struct {
-	XMLName           xml.Name          `xml:"RecipientStatuses" json:"-"`
-	RecipientStatuses []RecipientStatus `xml:"RecipientStatus"`
-}
-
-type RecipientStatus struct {
-	XMLName            xml.Name `xml:"RecipientStatus" json:"-"`
-	Type               string
-	EMail              string
-	UserName           string
-	RoutingOrder       string
-	Sent               string
-	Delivered          string
-	Signed             string
-	DeclineReason      string
-	Status             string
-	RecipientIPAddress string
-	TabStatuses TabStatuses `xml:"TabStatuses"`
-}
-
-type TabStatuses struct {
-	XMLName xml.Name `xml:"TabStatuses" json:"-"`
-	TabStatuses []TabStatus `xml:"TabStatus"`
-}
-
-type TabStatus struct {
-	XMLName xml.Name `xml:"TabStatus" json:"-"`
-	TabType string
-	Status string
-	XPosition int
-	YPosition int
-	Signed string
-	TabLabel string
-	TabName string
-	TabValue string
-	DocumentID int
-	PageNumber int
-	OriginalValue string
-	ValidationPattern string
-	RoleName string
-	ListValues string
-	ListSelectedValue string
-	ScaleValue float64
-}
 
 func main() {
-	handler := makeHandlerfunc()
+	var awsContext awsctx.AWSContext
+
+	sess := session.New()
+	svc := sqs.New(sess)
+	awsContext.SQSSvc = svc
+
+	handler := makeHandlerfunc(&awsContext)
 	lambda.Start(handler)
 }

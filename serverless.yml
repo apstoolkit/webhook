@@ -4,24 +4,22 @@ service: webhook
 provider:
   name: aws
   runtime: go1.x
+  environment:
+    SQS_URL:
+      Ref: StatusMessageQueue
+    QUEUE_NAME: ${self:service}-${opt:stage, self:provider.stage}-dsstatq
 #  apiKeys:
 #    - webhook-${opt:stage, self:provider.stage}
   usagePlan:
     throttle:
       burstLimit: 20
       rateLimit: 10
-#  iamRoleStatements:
-#    - Effect: Allow
-#      Action:
-#        - sns:Publish
-#      Resource: "*"
-#    - Effect: Allow
-#      Action:
-#        - ses:SendEmail
-#        - ses:VerifyEmailIdentity
-#      Resource: "*"
-
-
+  iamRoleStatements:
+    - Effect: Allow
+      Action:
+        - sqs:SendMessage
+      Resource:
+        Fn::GetAtt: [ StatusMessageQueue, Arn ]
 
 package:
  exclude:
@@ -37,5 +35,12 @@ functions:
           path: webhook
           method: post
           private: false
+
+resources:
+  Resources:
+    StatusMessageQueue:
+      Type: AWS::SQS::Queue
+      Properties:
+        QueueName: ${self:provider.environment.QUEUE_NAME}
 
 
