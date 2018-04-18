@@ -165,3 +165,62 @@ func TestParsing(t *testing.T) {
 	fmt.Println("\n---- JSON follows----")
 	fmt.Println(string(jsonBytes))
 }
+
+func TestIpCheck(t *testing.T) {
+
+	tests := []struct {
+		name    string
+		xForwardedFor string
+		expect  bool
+		hasError     bool
+	}{
+		{
+			"empty header",
+			"",
+			false,
+			true,
+		},
+		{
+			"first 162",
+			"162.248.184.1, 54.240.149.46",
+			true,
+			false,
+		},
+		{
+			"last 162",
+			"162.248.187.254, 54.240.149.46",
+			true,
+			false,
+		},
+		{
+			"one pastlast 162",
+			"162.248.187.255, 54.240.149.46",
+			false,
+			false,
+		},
+		{
+			"known single",
+			"52.26.192.160, 54.240.149.46",
+			true,
+			false,
+		},
+		{
+			"unknown single",
+			"111.222.111.222, 54.240.149.46",
+			false,
+			false,
+		},
+
+
+	}
+
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			ok, err := isCallerDocusign(test.xForwardedFor)
+			assert.Equal(t, test.hasError, err != nil)
+			assert.Equal(t, test.expect, ok)
+		})
+
+	}
+
+}
