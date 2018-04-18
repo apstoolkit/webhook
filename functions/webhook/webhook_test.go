@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/stretchr/testify/assert"
 	"testing"
+	"encoding/json"
 )
 
 var samplePayload = `
@@ -159,4 +160,8 @@ func TestParsing(t *testing.T) {
 		fmt.Printf("%+v", envInfo)
 		assert.Equal(t, "2018-04-17T15:00:22.2587658", envInfo.EnvelopeStatus.TimeGenerated)
 	}
+
+	jsonBytes, err := json.Marshal(&envInfo)
+	fmt.Println("---- JSON follow----")
+	fmt.Println(string(jsonBytes))
 }
