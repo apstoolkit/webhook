@@ -1,0 +1,41 @@
+service: webhook
+
+
+provider:
+  name: aws
+  runtime: go1.x
+#  apiKeys:
+#    - webhook-${opt:stage, self:provider.stage}
+  usagePlan:
+    throttle:
+      burstLimit: 20
+      rateLimit: 10
+#  iamRoleStatements:
+#    - Effect: Allow
+#      Action:
+#        - sns:Publish
+#      Resource: "*"
+#    - Effect: Allow
+#      Action:
+#        - ses:SendEmail
+#        - ses:VerifyEmailIdentity
+#      Resource: "*"
+
+
+
+package:
+ exclude:
+   - ./**
+ include:
+   - ./bin/**
+
+functions:
+  webhook:
+    handler: bin/webhook
+    events:
+      - http:
+          path: webhook
+          method: post
+          private: false
+
+
