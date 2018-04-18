@@ -21,6 +21,7 @@ func makeHandlerfunc() func(request events.APIGatewayProxyRequest) (events.APIGa
 type DocuSignEnvelopeInformation struct {
 	XMLName        xml.Name       `xml:"DocuSignEnvelopeInformation"`
 	EnvelopeStatus EnvelopeStatus `xml:"EnvelopeStatus"`
+	DocumentPDFs   DocumentPDFs   `xml:"DocumentPDFs"`
 	TimeZone       string
 	TimeZoneOffset string
 }
@@ -40,6 +41,17 @@ type EnvelopeStatus struct {
 	Completed       string
 	SigningLocation string
 	SenderIPAddress string
+}
+
+type DocumentPDFs struct {
+	XMLName      xml.Name `xml:"DocumentPDFs"`
+	DocumentPDFs []DocumentPDF `xml:"DocumentPDF"`
+}
+
+type DocumentPDF struct {
+	XMLName xml.Name `xml:"DocumentPDF"`
+	Name    string
+	DocumentType    string
 }
 
 func main() {
