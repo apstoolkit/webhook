@@ -56,30 +56,30 @@ type RecipientStatus struct {
 	DeclineReason      string
 	Status             string
 	RecipientIPAddress string
-	TabStatuses TabStatuses `xml:"TabStatuses"`
+	TabStatuses        TabStatuses `xml:"TabStatuses"`
 }
 
 type TabStatuses struct {
-	XMLName xml.Name `xml:"TabStatuses" json:"-"`
+	XMLName     xml.Name    `xml:"TabStatuses" json:"-"`
 	TabStatuses []TabStatus `xml:"TabStatus"`
 }
 
 type TabStatus struct {
-	XMLName xml.Name `xml:"TabStatus" json:"-"`
-	TabType string
-	Status string
-	XPosition int
-	YPosition int
-	Signed string
-	TabLabel string
-	TabName string
-	TabValue string
-	DocumentID int
-	PageNumber int
-	OriginalValue string
+	XMLName           xml.Name `xml:"TabStatus" json:"-"`
+	TabType           string
+	Status            string
+	XPosition         int
+	YPosition         int
+	Signed            string
+	TabLabel          string
+	TabName           string
+	TabValue          string
+	DocumentID        int
+	PageNumber        int
+	OriginalValue     string
 	ValidationPattern string
-	RoleName string
-	ListValues string
+	RoleName          string
+	ListValues        string
 	ListSelectedValue string
-	ScaleValue float64
+	ScaleValue        float64
 }

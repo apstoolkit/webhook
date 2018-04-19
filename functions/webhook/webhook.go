@@ -1,20 +1,20 @@
 package main
 
 import (
+	"encoding/json"
 	"encoding/xml"
+	"errors"
+	"github.com/apstoolkit/webhook/awsctx"
 	"github.com/aws/aws-lambda-go/events"
 	"github.com/aws/aws-lambda-go/lambda"
+	"github.com/aws/aws-sdk-go/aws"
+	"github.com/aws/aws-sdk-go/aws/session"
+	"github.com/aws/aws-sdk-go/service/sqs"
 	"log"
 	"net/http"
-	"encoding/json"
-	"strings"
-	"errors"
-	"strconv"
-	"github.com/aws/aws-sdk-go/aws/session"
-	"github.com/apstoolkit/webhook/awsctx"
-	"github.com/aws/aws-sdk-go/service/sqs"
-	"github.com/aws/aws-sdk-go/aws"
 	"os"
+	"strconv"
+	"strings"
 )
 
 func ipOctects(ip string) ([]int, error) {
@@ -31,7 +31,7 @@ func ipOctects(ip string) ([]int, error) {
 			return nil, err
 		}
 
-		octets = append(octets,o)
+		octets = append(octets, o)
 	}
 
 	return octets, nil
@@ -100,20 +100,23 @@ func processRequest(awsContext *awsctx.AWSContext, request events.APIGatewayProx
 		return events.APIGatewayProxyResponse{StatusCode: http.StatusForbidden}, nil
 	}
 
+	log.Println("parse message")
 	var envInfo DocuSignEnvelopeInformation
 	err = xml.Unmarshal([]byte(request.Body), &envInfo)
 	if err != nil {
 		return events.APIGatewayProxyResponse{StatusCode: http.StatusBadRequest}, nil
 	}
 
+	log.Println("convert to JSON")
 	jsonBytes, err := json.Marshal(&envInfo)
 	if err == nil {
 		log.Println(string(jsonBytes))
 	}
 
+	log.Println("Write to status queue")
 	sendMessageInput := sqs.SendMessageInput{
 		MessageBody: aws.String(string(jsonBytes)),
-		QueueUrl: aws.String(os.Getenv("SQS_URL")),
+		QueueUrl:    aws.String(os.Getenv("SQS_URL")),
 	}
 
 	_, err = awsContext.SQSSvc.SendMessage(&sendMessageInput)
@@ -122,16 +125,15 @@ func processRequest(awsContext *awsctx.AWSContext, request events.APIGatewayProx
 		return events.APIGatewayProxyResponse{StatusCode: 500}, nil
 	}
 
+	log.Println("mission accomplished")
 	return events.APIGatewayProxyResponse{StatusCode: 200}, nil
 }
 
 func makeHandlerfunc(awsContent *awsctx.AWSContext) func(request events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
 	return func(request events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
-		return processRequest(awsContent,request)
+		return processRequest(awsContent, request)
 	}
 }
-
-
 
 func main() {
 	var awsContext awsctx.AWSContext

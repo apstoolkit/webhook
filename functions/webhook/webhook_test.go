@@ -1,11 +1,11 @@
 package main
 
 import (
+	"encoding/json"
 	"encoding/xml"
 	"fmt"
 	"github.com/stretchr/testify/assert"
 	"testing"
-	"encoding/json"
 )
 
 var samplePayload = `
@@ -169,10 +169,10 @@ func TestParsing(t *testing.T) {
 func TestIpCheck(t *testing.T) {
 
 	tests := []struct {
-		name    string
+		name          string
 		xForwardedFor string
-		expect  bool
-		hasError     bool
+		expect        bool
+		hasError      bool
 	}{
 		{
 			"empty header",
@@ -210,8 +210,6 @@ func TestIpCheck(t *testing.T) {
 			false,
 			false,
 		},
-
-
 	}
 
 	for _, test := range tests {
