@@ -114,7 +114,12 @@ func processRequest(awsContext *awsctx.AWSContext, request events.APIGatewayProx
 	}
 
 	log.Println("Write to status queue")
+
+	var msgAttrMap = make(map[string]*sqs.MessageAttributeValue)
+	msgAttrMap["envelope_id"] = &sqs.MessageAttributeValue{StringValue:aws.String(envInfo.EnvelopeStatus.EnvelopeID),DataType:aws.String("String")}
+
 	sendMessageInput := sqs.SendMessageInput{
+		MessageAttributes: msgAttrMap,
 		MessageBody: aws.String(string(jsonBytes)),
 		QueueUrl:    aws.String(os.Getenv("SQS_URL")),
 	}
