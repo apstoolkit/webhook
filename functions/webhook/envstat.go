@@ -47,7 +47,7 @@ type RecipientStatuses struct {
 type RecipientStatus struct {
 	XMLName            xml.Name `xml:"RecipientStatus" json:"-"`
 	Type               string
-	EMail              string
+	Email              string
 	UserName           string
 	RoutingOrder       string
 	Sent               string
