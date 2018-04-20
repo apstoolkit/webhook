@@ -6,3 +6,9 @@ To deploy:
 
 * make
 * sls deploy
+
+Dependencies:
+
+The sqs2kafka utility requires IAM permission to receive messages from the
+queue associated with instances of the web hook, plus permission to delete
+messages once processed. It is configured with the queue address.
